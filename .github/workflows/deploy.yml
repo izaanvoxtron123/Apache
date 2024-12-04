@@ -43,6 +43,6 @@ jobs:
           }
 
           # Change ownership after deployment
-          chown -R www-data:www-data /var/www/html/Apache
+          #chown -R www-data:www-data /var/www/html/Apache
         EOF
 
