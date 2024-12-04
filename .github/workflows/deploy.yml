@@ -33,7 +33,7 @@ jobs:
               
 
               # save the current state
-              cd /var/www/html/crm_izaan
+              cd /var/www/html/Apache
               LAST_COMMIT=$(git rev-parse HEAD)
               echo $LAST_COMMIT > /root/last_commit
 
