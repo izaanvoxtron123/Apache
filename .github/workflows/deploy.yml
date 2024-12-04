@@ -41,7 +41,7 @@ jobs:
               git checkout main
               git pull origin main || {
                 echo "Deployment failed, rolling back ...";
-                git reset -hard $(cat /root/last_commit);
+                git reset -hard $(cat /home/ubuntu/last_commit);
                 exit 1;
               }
 
