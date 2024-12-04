@@ -23,7 +23,7 @@ jobs:
         - name: Set git safe dir
           run: |
             ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
-              git config --global --add safe.diectory /var/www/html/crm_izaan
+              git config --global --add safe.diectory /var/www/html/Apache
             EOF
 
         - name: Deploy
@@ -46,7 +46,7 @@ jobs:
               }
 
               # Change ownership afterdeployment 
-              chown -R www-data:www-data /var/www/html/crm_izaan
+              chown -R www-data:www-data /var/www/html/Apache
             EOF
 
         - name: Send mail
