@@ -1,73 +1,51 @@
-name: Deploy CRM to APACHE
-
+name: Deploy to server
 on:
   push:
     branches:
       - main
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up SSH for EC2
-      uses: webfactory/ssh-agent@v0.6.0
-      with:
-        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: Setup SSH With Ec2 instance
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Set git safe dir
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
+      - name: Making git safe directory
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 << 'EOF'
           git config --global --add safe.directory /var/www/html/Apache
-        EOF
+          EOF
 
-    - name: Deploy
-      run: |
-        ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
+      - name: Deploy To Server
+        run: |
+          ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 << 'EOF'
           set -e
+          set -x  # Enable debugging to show commands being executed
 
-          # Save the current state
-          cd /var/www/html/Apache
+          # Navigate to the project directory
+          cd /var/www/html/Apache/
+
+          # Save the current commit hash for rollback
           LAST_COMMIT=$(git rev-parse HEAD)
           echo $LAST_COMMIT > /home/ubuntu/last_commit
 
-          # Try deploying
+          # Check the status of the repository and pull the latest changes
+          git status
           git checkout main
           git pull origin main || {
-            echo "Deployment failed, rolling back ...";
-            git reset --hard $(cat /home/ubuntu/last_commit);
-            exit 1;
+            echo "Deployment failed due to git pull error"
+            git reset --hard $(cat /home/ubuntu/last_commit)
+            exit 1
           }
 
-          # Change ownership after deployment
+          # Set ownership for the project directory
           chown -R www-data:www-data /var/www/html/Apache
-        EOF
 
-    - name: Send success mail
-      if: success()
-      uses: dawidd6/action-send-mail@v4
-      with:
-        server_address: smtp.yandex.com
-        server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}
-        password: ${{ secrets.MAIL_PASSWORD }}
-        subject: Done Deployment
-        to: "izaan.voxtron@gmail.com,izaanvohra40@gmail.com"
-        from: ${{ secrets.MAIL_USERNAME }}
-        body: "Build job of ${{ github.repository }} completed successfully on branch ${{ github.ref }}!"
-
-    - name: Send failure mail
-      if: failure()
-      uses: dawidd6/action-send-mail@v4
-      with:
-        server_address: smtp.yandex.com
-        server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}
-        password: ${{ secrets.MAIL_PASSWORD }}
-        subject: Deployment Failed
-        to: "izaan.voxtron@gmail.com,izaanvohra40@gmail.com"
-        from: ${{ secrets.MAIL_USERNAME }}
-        body: "Build job of ${{ github.repository }} failed!"
+          echo "Deployment successful"
+          EOF
