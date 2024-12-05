@@ -27,7 +27,7 @@ jobs:
                 pr_assignee: ""
                 pr_label: "auto-pr"
                 pr_allow_empty: true
-                github_token: ${{ secrets.GITHUB_TOKEN }}
+                github_token: ${{ secrets.TOKEN }}
 
             - name: Get Repository Info
               id: repo_info
