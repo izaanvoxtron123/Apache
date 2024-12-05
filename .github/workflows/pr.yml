@@ -21,13 +21,13 @@ jobs:
                 source_branch: ""
                 destination_branch: "main"
                 pr_title: "Pulling ${{ github.ref }} into main"
-                pr.body: |
+                pr_body: |
                     :crown: **An automated PR**
                     
                 pr_assignee: ""
                 pr_label: "auto-pr"
                 pr_allow_empty: true
-                gitub_token: ${{ secrets.TOKEN }}
+                github_token: ${{ secrets.TOKEN }}
 
             - name: Get Repository Info
               id: repo_info
