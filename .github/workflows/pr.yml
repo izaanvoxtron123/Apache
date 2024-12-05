@@ -1,0 +1,36 @@
+name: Crate PR
+
+on:
+    push:
+        branches-ignore:
+            -main
+
+
+jobs:
+    auto-pull-request:
+        name: PullRequestAction
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v3
+
+            - name: Create Pull Request
+              id: create_pr
+              uses: diillson/auto-pull-request@v1.0.1
+              with:
+                source_branch: ""
+                destination_branch: "main"
+                pr_title: "Pulling ${{ github.ref }} into main"
+                pr.body: |
+                    :crown: **An automated PR**
+                    
+                pr_assignee: "vox-global"
+                pr_label: "auto-pr"
+                pr_allow_empty: true
+                gitub_token: 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
+
+            - name: Get Repository Info
+              id: repo_info
+              run: |
+                echo "::set-output name=repo::$(echo $GITHUB_REPOSITORY)"
+                echo "::set-output name=pr_number::$(jq -r '.number' /tmp/pull-request.json)"
