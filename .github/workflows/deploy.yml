@@ -1,78 +1,48 @@
 name: Deploy CRM to APACHE
 
 on:
-    push:
-        branches:
-            - main
-
-
+  push:
+    branches:
+      - main
 
 jobs:
-    deploy:
-        runs-on: ubuntu-latest
+  deploy:
+    runs-on: ubuntu-latest
 
-        steps:
-        - name: Checkout code
-          uses: actions/checkout@v3
-          
-        - name: Set up SSH for EC2
-          uses: webfactory/ssh-agent@v0.6.0
-          with:
-            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-        - name: Set git safe dir
-          run: |
-            ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
-              git config --global --add safe.diectory /var/www/html/Apache
-            EOF
+    - name: Set up SSH for EC2
+      uses: webfactory/ssh-agent@v0.6.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-        - name: Deploy
-          run: |
-            ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
-              set -e
-              
+    - name: Set git safe dir
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
+          git config --global --add safe.directory /var/www/html/Apache
+        EOF
 
-              # save the current state
-              cd /var/www/html/Apache
-              LAST_COMMIT=$(git rev-parse HEAD)
-              echo $LAST_COMMIT > /root/last_commit
+    - name: Deploy
+      run: |
+        ssh -o StrictHostKeyChecking=no ubuntu@13.61.151.146 <<'EOF'
+          set -e
 
-              # Trying to deply
-              git checkout main
-              git pull origin main || {
-                echo "Deployment failed, rolling back ...";
-                git reset -hard $(cat /root/last_commit);
-                exit 1;
-              }
+          # Save the current state
+          cd /var/www/html/Apache
+          LAST_COMMIT=$(git rev-parse HEAD)
+          echo $LAST_COMMIT > /home/ubuntu/last_commit
 
-              # Change ownership afterdeployment 
-              chown -R www-data:www-data /var/www/html/Apache
-            EOF
+          # Try deploying
+          git checkout main
+          git pull origin main || {
+            echo "Deployment failed, rolling back ...";
+            git reset --hard $(cat /home/ubuntu/last_commit);
+            exit 1;
+          }
 
-        - name: Send mail
-          if: success()
-          uses: dawidd6/action-send-mail@v4
-          with:
-            server_address: smtp.yandex.com
-            server_port: 465
-            username: ${{secrets.MAIL_USERNAME}}
-            password: ${{secrets.MAIL_PASSWORD}}
-            subject: Done Deployment
-            to: "izaan.voxtron@gmail.com,izaanvohra40@gmail.com"
-            from: ${{secrets.MAIL_USERNAME}}
-            body: Build job of ${{github.repository}} completed successfully!
-        
+          # Change ownership after deployment
+          #chown -R www-data:www-data /var/www/html/Apache
+        EOF
 
-        - name: Send mail
-          if: failure()
-          uses: dawidd6/action-send-mail@v4
-          with:
-            server_address: smtp.yandex.com
-            server_port: 465
-            username: ${{secrets.MAIL_USERNAME}}
-            password: ${{secrets.MAIL_PASSWORD}}
-            subject: Done Deployment
-            to: "izaan.voxtron@gmail.com,izaanvohra40@gmail.com"
-            from: ${{secrets.MAIL_USERNAME}}
-            body: Build job of ${{github.repository}} completed successfully!
-        
