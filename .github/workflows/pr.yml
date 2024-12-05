@@ -1,4 +1,4 @@
-name: Crate PR
+name: Create PR
 
 on:
     push:
