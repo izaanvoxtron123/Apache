@@ -27,7 +27,7 @@ jobs:
                 pr_assignee: "vox-global"
                 pr_label: "auto-pr"
                 pr_allow_empty: true
-                gitub_token: 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
+                gitub_token: ${{ secrets.TOKEN }}
 
             - name: Get Repository Info
               id: repo_info
