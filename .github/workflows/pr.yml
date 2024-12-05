@@ -24,7 +24,7 @@ jobs:
                 pr.body: |
                     :crown: **An automated PR**
                     
-                pr_assignee: "vox-global"
+                pr_assignee: ""
                 pr_label: "auto-pr"
                 pr_allow_empty: true
                 gitub_token: ${{ secrets.TOKEN }}
